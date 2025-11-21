@@ -264,7 +264,7 @@ Inspired by [Handlebars.js](https://handlebarsjs.com/) and modern PHP best pract
 
 <div align="center">
 
-**Built with ❤️ by [Aliz Harb](https://github.com/AlizHarb)**
+**Built with ❤️ by [Ali Harb](https://github.com/AlizHarb)**
 
 [⬆ Back to Top](#-azhbx)
 
