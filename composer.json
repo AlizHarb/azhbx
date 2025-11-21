@@ -1,0 +1,38 @@
+{
+  "name": "alizharb/azhbx",
+  "description": "A modern, production-ready PHP 8.5 templating engine inspired by Handlebars.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Ali Harb",
+      "email": "harbzali@gmail.com",
+      "role": "Developer",
+      "homepage": "https://github.com/AlizHarb"
+    }
+  ],
+  "require": {
+    "php": ">=8.5",
+    "symfony/var-dumper": "^7.0"
+  },
+  "require-dev": {
+    "pestphp/pest": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "AlizHarb\\AzHbx\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

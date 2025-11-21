@@ -1,0 +1,4 @@
+
+<h1>Async Data Loading</h1>
+<p>User: {{ user }}</p>
+<p>Status: {{ status }}</p>

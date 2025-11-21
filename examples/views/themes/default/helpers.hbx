@@ -1,0 +1,8 @@
+
+<h1>Helpers</h1>
+
+<p>Original: {{ message }}</p>
+<p>Uppercase: {{ uppercase message }}</p>
+
+<p>Date: {{ date }}</p>
+<p>Formatted: {{ formatDate date "F j, Y" }}</p>

@@ -1,0 +1,5 @@
+
+<h1>Hello, {{ name }}!</h1>
+<p>Welcome to {{ library }}.</p>
+<p>Current time: {{ time }}</p>
+<p>Raw HTML: {{{ raw_html }}}</p>

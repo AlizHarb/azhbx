@@ -1,0 +1,7 @@
+
+{{#extend "layout"}}
+    {{#block "content"}}
+        <h2>{{ pageTitle }}</h2>
+        <p>This is the content of the page.</p>
+    {{/block}}
+{{/extend}}
