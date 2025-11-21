@@ -4,7 +4,7 @@
 
 **Next-Generation PHP Templating Engine**
 
-[![PHP Version](https://img.shields.io/badge/PHP-8.5%2B-777BB4?style=flat-square&logo=php)](https://php.net)
+[![PHP Version](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=flat-square&logo=php)](https://php.net)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
 
@@ -18,7 +18,7 @@ _Handlebars-inspired • Modern PHP • Production-Ready_
 
 ## 🎯 Overview
 
-**AzHbx** (AlizHarb Handlebars Extended) is a powerful, modern PHP templating engine designed for PHP 8.5+. It combines the elegance of Handlebars syntax with cutting-edge PHP features like Property Hooks and Attributes, delivering exceptional performance and developer experience.
+**AzHbx** (AlizHarb Handlebars Extended) is a powerful, modern PHP templating engine designed for PHP 8.3+. It combines the elegance of Handlebars syntax with cutting-edge PHP features like Property Hooks and Attributes, delivering exceptional performance and developer experience.
 
 ### Why AzHbx?
 
@@ -26,7 +26,7 @@ _Handlebars-inspired • Modern PHP • Production-Ready_
 - **⚡ Blazing Fast**: Compiles to native PHP with OpCache support
 - **🎨 Theme System**: Built-in multi-theme support with fallback logic
 - **🧩 Modular Architecture**: Organize templates by feature/package
-- **🔌 Plugin System**: Extend functionality with PHP 8.5 Attributes
+- **🔌 Plugin System**: Extend functionality with PHP 8.3+ Attributes
 - **📦 Zero Dependencies**: Works with or without Composer
 - **🎯 Developer-Friendly**: Clean syntax, comprehensive docs, great DX
 
@@ -47,7 +47,7 @@ _Handlebars-inspired • Modern PHP • Production-Ready_
 
 - **🎨 Theme Management**: Switch themes at runtime with smart fallbacks
 - **📦 Module System**: Namespace templates by feature (`blog::post`)
-- **🔌 Plugin Architecture**: Use PHP 8.5 `#[Helper]` attributes
+- **🔌 Plugin Architecture**: Use PHP 8.3+ `#[Helper]` attributes
 - **⚡ Async Support**: Compatible with PHP Fibers for non-blocking I/O
 - **🔐 Security First**: XSS prevention with auto-escaping
 - **💾 Smart Caching**: Automatic recompilation on file changes
@@ -149,7 +149,7 @@ Visit `http://localhost:8001` to see:
 
 ## 🔌 Plugin System
 
-Create powerful extensions using PHP 8.5 Attributes:
+Create powerful extensions using PHP 8.3+ Attributes:
 
 ```php
 use AlizHarb\AzHbx\Contracts\PluginInterface;
@@ -245,7 +245,7 @@ composer test
 
 ## 📋 Requirements
 
-- **PHP**: 8.5 or higher
+- **PHP**: 8.3 or higher
 - **Extensions**: `mbstring`
 
 ---

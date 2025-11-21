@@ -1,6 +1,6 @@
 {
   "name": "alizharb/azhbx",
-  "description": "A modern, production-ready PHP 8.5 templating engine inspired by Handlebars.",
+  "description": "A modern, production-ready PHP 8.3+ templating engine inspired by Handlebars.",
   "type": "library",
   "license": "MIT",
   "authors": [
