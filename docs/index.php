@@ -47,11 +47,11 @@ foreach ($menu as $section => $items) {
 
 // Security check
 if (!array_key_exists($page, $flatMenu)) {
-    $page = 'index.md';
+    $page = 'introduction';
     $currentPageTitle = 'Introduction';
 }
 
-$content = file_get_contents(__DIR__ . '/' . $page);
+$content = file_get_contents(__DIR__ . '/' . $page . '.md');
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
