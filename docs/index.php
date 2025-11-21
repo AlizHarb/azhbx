@@ -14,24 +14,24 @@ $config = [
 // Navigation Structure
 $menu = [
     'Getting Started' => [
-        'index.md' => 'Introduction',
-        'installation.md' => 'Installation & Config',
+        'introduction' => 'Introduction',
+        'installation' => 'Installation',
+        'basics' => 'Basic Usage',
     ],
     'Core Concepts' => [
-        'basics.md' => 'Basic Syntax',
-        'control-structures.md' => 'Control Structures',
-        'layouts-and-partials.md' => 'Layouts & Partials',
-        'helpers.md' => 'Helpers',
-        'plugins.md' => 'Plugins & Extensions',
+        'control-structures' => 'Control Structures',
+        'layouts-and-partials' => 'Layouts & Partials',
+        'helpers' => 'Helpers',
+        'plugins' => 'Plugins & Extensions',
     ],
     'Architecture' => [
-        'themes-and-modules.md' => 'Themes & Modules',
-        'advanced.md' => 'Advanced Topics',
+        'themes-and-modules' => 'Themes & Modules',
+        'advanced' => 'Advanced Topics',
     ]
 ];
 
 // Determine current page
-$page = $_GET['page'] ?? 'index.md';
+$page = $_GET['page'] ?? 'introduction';
 $currentPageTitle = 'Documentation';
 
 // Flatten menu for validation and title lookup

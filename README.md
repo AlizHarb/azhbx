@@ -103,20 +103,25 @@ echo $engine->render('welcome', [
 
 ## 📚 Documentation
 
-Comprehensive documentation is available in the `docs/` directory or online:
+### 🌐 Online Documentation
 
-- **[Installation & Configuration](docs/installation.md)**
-- **[Basic Syntax](docs/basics.md)**
-- **[Control Structures](docs/control-structures.md)**
-- **[Layouts & Partials](docs/layouts-and-partials.md)**
-- **[Custom Helpers](docs/helpers.md)**
-- **[Plugins & Extensions](docs/plugins.md)**
-- **[Themes & Modules](docs/themes-and-modules.md)**
-- **[Advanced Topics](docs/advanced.md)**
+**Visit the live documentation**: [https://alizharb.github.io/azhbx/](https://alizharb.github.io/azhbx/)
 
-### Interactive Documentation
+Browse comprehensive guides and examples:
 
-Run the built-in documentation website:
+- **[Introduction](https://alizharb.github.io/azhbx/?page=introduction)**
+- **[Installation & Configuration](https://alizharb.github.io/azhbx/?page=installation)**
+- **[Basic Syntax](https://alizharb.github.io/azhbx/?page=basics)**
+- **[Control Structures](https://alizharb.github.io/azhbx/?page=control-structures)**
+- **[Layouts & Partials](https://alizharb.github.io/azhbx/?page=layouts-and-partials)**
+- **[Custom Helpers](https://alizharb.github.io/azhbx/?page=helpers)**
+- **[Plugins & Extensions](https://alizharb.github.io/azhbx/?page=plugins)**
+- **[Themes & Modules](https://alizharb.github.io/azhbx/?page=themes-and-modules)**
+- **[Advanced Topics](https://alizharb.github.io/azhbx/?page=advanced)**
+
+### 📖 Local Documentation
+
+You can also run the documentation website locally:
 
 ```bash
 php -S localhost:8000 -t docs
