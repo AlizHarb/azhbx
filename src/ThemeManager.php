@@ -10,7 +10,7 @@ use AlizHarb\AzHbx\Exceptions\EngineException;
  * Theme Manager
  *
  * Manages multiple themes with automatic fallback to default theme.
- * Uses PHP 8.5 Property Hooks for theme validation.
+ * Provides theme validation and resolution.
  *
  * @package AlizHarb\AzHbx
  * @author  Ali Harb <harbzali@gmail.com>
@@ -27,21 +27,11 @@ class ThemeManager
     private string $viewsPath;
 
     /**
-     * Active theme name with validation
-     *
-     * Uses PHP 8.5 Property Hooks to validate theme name on set.
+     * Active theme name
      *
      * @var string
      */
-    public string $activeTheme {
-        get => $this->activeTheme;
-        set {
-            if (empty($value)) {
-                throw new \InvalidArgumentException("Theme name cannot be empty.");
-            }
-            $this->activeTheme = $value;
-        }
-    }
+    private string $activeTheme;
 
     /**
      * Initialize theme manager
@@ -52,7 +42,33 @@ class ThemeManager
     public function __construct(string $viewsPath, string $defaultTheme = 'default')
     {
         $this->viewsPath = $viewsPath;
-        $this->activeTheme = $defaultTheme;
+        $this->setActiveTheme($defaultTheme);
+    }
+
+    /**
+     * Get the active theme name
+     *
+     * @return string Active theme name
+     */
+    public function getActiveTheme(): string
+    {
+        return $this->activeTheme;
+    }
+
+    /**
+     * Set the active theme name
+     *
+     * @param string $theme Theme name
+     *
+     * @return void
+     * @throws \InvalidArgumentException If theme name is empty
+     */
+    public function setActiveTheme(string $theme): void
+    {
+        if (empty($theme)) {
+            throw new \InvalidArgumentException("Theme name cannot be empty.");
+        }
+        $this->activeTheme = $theme;
     }
 
     /**

@@ -220,7 +220,7 @@ class Engine
      */
     public function setTheme(string $theme): void
     {
-        $this->themeManager->activeTheme = $theme;
+        $this->themeManager->setActiveTheme($theme);
     }
 
     /**

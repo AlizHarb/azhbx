@@ -38,7 +38,7 @@ class ModuleManager
      * Resolve module template path
      *
      * Expects format: 'module::view'
-     * Resolves to: views/modules/{module}/views/{view}.hbx
+     * Resolves to: views/modules/{module}/{view}.hbx
      *
      * @param string $template Module template identifier (e.g., 'blog::post')
      *
@@ -49,7 +49,7 @@ class ModuleManager
         // Format: module::view
         [$module, $view] = explode('::', $template, 2);
 
-        // New structure: modules/{module}/views/{view}.hbx
-        return $this->viewsPath . '/modules/' . $module . '/views/' . $view . '.hbx';
+        // Structure: modules/{module}/{view}.hbx
+        return $this->viewsPath . '/modules/' . $module . '/' . $view . '.hbx';
     }
 }
