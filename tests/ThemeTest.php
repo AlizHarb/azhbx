@@ -13,8 +13,11 @@ test('it renders with themes', function () {
     file_put_contents(__DIR__ . '/../examples/views/themes/default/theme_test.hbx', 'Default Theme');
 
     // Create dark theme template
-    mkdir(__DIR__ . '/../examples/views/themes/dark', 0755, true);
-    file_put_contents(__DIR__ . '/../examples/views/themes/dark/theme_test.hbx', 'Dark Theme');
+    $darkThemeDir = __DIR__ . '/../examples/views/themes/dark';
+    if (!is_dir($darkThemeDir)) {
+        mkdir($darkThemeDir, 0755, true);
+    }
+    file_put_contents($darkThemeDir . '/theme_test.hbx', 'Dark Theme');
 
     // Test default
     expect($engine->render('theme_test'))->toBe('Default Theme');

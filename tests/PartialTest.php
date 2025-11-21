@@ -8,9 +8,15 @@ test('it renders partials', function () {
         'cache_path' => __DIR__ . '/../cache',
     ]);
 
+    // Ensure partials directory exists
+    $partialsDir = __DIR__ . '/../examples/views/partials';
+    if (!is_dir($partialsDir)) {
+        mkdir($partialsDir, 0755, true);
+    }
+
     // Create partial
     $partialContent = 'Hello from partial, {{name}}!';
-    file_put_contents(__DIR__ . '/../examples/views/partials/header.hbx', $partialContent);
+    file_put_contents($partialsDir . '/header.hbx', $partialContent);
 
     // Create main template
     $templateContent = 'Start {{ partial "header" }} End';
@@ -20,6 +26,6 @@ test('it renders partials', function () {
     expect($result)->toBe('Start Hello from partial, User! End');
     
     // Clean up
-    unlink(__DIR__ . '/../examples/views/partials/header.hbx');
+    unlink($partialsDir . '/header.hbx');
     unlink(__DIR__ . '/../examples/views/themes/default/partial_test.hbx');
 });

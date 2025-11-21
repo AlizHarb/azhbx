@@ -9,8 +9,11 @@ test('it renders module templates', function () {
     ]);
 
     // Create module structure
-    mkdir(__DIR__ . '/../examples/views/modules/blog', 0755, true);
-    file_put_contents(__DIR__ . '/../examples/views/modules/blog/post.hbx', 'Blog Post');
+    $blogModuleDir = __DIR__ . '/../examples/views/modules/blog';
+    if (!is_dir($blogModuleDir)) {
+        mkdir($blogModuleDir, 0755, true);
+    }
+    file_put_contents($blogModuleDir . '/post.hbx', 'Blog Post');
 
     // Render module template
     expect($engine->render('blog::post'))->toBe('Blog Post');
