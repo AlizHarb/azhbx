@@ -28,6 +28,11 @@
       "Tests\\": "tests/"
     }
   },
+  "scripts": {
+    "test": "pest",
+    "test:coverage": "pest --coverage",
+    "check-style": "echo 'Code style check not configured yet'"
+  },
   "config": {
     "allow-plugins": {
       "pestphp/pest-plugin": true
