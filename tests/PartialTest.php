@@ -24,7 +24,7 @@ test('it renders partials', function () {
 
     $result = $engine->render('partial_test', ['name' => 'User']);
     expect($result)->toBe('Start Hello from partial, User! End');
-    
+
     // Clean up
     unlink($partialsDir . '/header.hbx');
     unlink(__DIR__ . '/../examples/views/themes/default/partial_test.hbx');

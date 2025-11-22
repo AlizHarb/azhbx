@@ -43,8 +43,86 @@ class Parser
      */
     public function parse(string $template): array
     {
+        $template = $this->preprocess($template);
         $tokens = $this->tokenize($template);
+
         return $this->buildAst($tokens);
+    }
+
+    /**
+     * Preprocess template to handle component syntax
+     *
+     * Converts <x-Name ... /> to {{ Name ... }}
+     * Converts <x-Name ...> to {{#Name ...}}
+     * Converts </x-Name> to {{/Name}}
+     *
+     * @param string $template Raw template
+     *
+     * @return string Processed template
+     */
+    private function preprocess(string $template): string
+    {
+        // 1. Handle self-closing tags: <az-Name ... /> -> {{ Name ... }}
+        $template = preg_replace_callback('/<az-([a-zA-Z0-9_.:-]+)\s*(.*?)\s*\/>/s', function ($matches) {
+            $name = $matches[1];
+            $attrs = $matches[2];
+
+            return "{{ {$name} {$attrs} }}";
+        }, $template);
+
+        // 2. Handle opening tags: <az-Name ...> -> {{#Name ...}}
+        $template = preg_replace_callback('/<az-([a-zA-Z0-9_.:-]+)\s*(.*?)>/s', function ($matches) {
+            $name = $matches[1];
+            $attrs = $matches[2];
+
+            return "{{#{$name} {$attrs}}}";
+        }, $template);
+
+        // 3. Handle closing tags: </az-Name> -> {{/Name}}
+        $template = preg_replace_callback('/<\/az-([a-zA-Z0-9_.:-]+)>/s', function ($matches) {
+            $name = $matches[1];
+
+            return "{{/{$name}}}";
+        }, $template);
+
+        // 4. Handle bare directives: @name ...
+        // We need to distinguish between inline (@csrf) and block start (@auth).
+        // We'll use a list of known block directives for now, or look for @endname.
+        // Actually, simpler:
+        // @endname -> {{/ @name }}
+        // @name ... -> {{ @name ... }} OR {{# @name ... }}
+
+        // Handle @end... first
+        $template = preg_replace_callback('/@end([a-zA-Z0-9_]+)/', function ($matches) {
+            return "{{/ @{$matches[1]} }}";
+        }, $template);
+
+        // Handle @else / @elseif (special cases)
+        $template = str_replace('@else', '{{else}}', $template);
+        $template = preg_replace('/@elseif\s*(.*)/', '{{else if $1}}', $template);
+
+        // Handle other directives
+        // We match lines starting with @, ignoring whitespace
+        $template = preg_replace_callback('/(?m)^\s*@([a-zA-Z0-9_]+)(.*)$/', function ($matches) {
+            $name = $matches[1];
+            $args = $matches[2];
+
+            // Skip if it's already processed (starts with end, else, elseif) - regex above handles end/else
+            // But wait, the regex matches @end too if we are not careful.
+            // The previous replace handled @end, so now we might match {{/ @name }}? No, that starts with {{.
+            // We only match lines starting with @.
+
+            // List of known block directives that need {{# }}
+            $blockDirectives = ['auth', 'guest', 'env', 'section', 'push', 'prepend', 'once', 'verbatim'];
+
+            if (in_array($name, $blockDirectives)) {
+                return "{{# @{$name}{$args} }}";
+            }
+
+            return "{{ @{$name}{$args} }}";
+        }, $template);
+
+        return $template;
     }
 
     /**
@@ -59,81 +137,62 @@ class Parser
     private function tokenize(string $template): array
     {
         $tokens = [];
-        
+
         $start = preg_quote($this->delimiters[0], '/');
         $end = preg_quote($this->delimiters[1], '/');
-        
+
         // Match {{{...}}} OR {{...}}
         // Note: {{{ must come first to match longest
         $pattern = '/' . $start . '{(.*?)' . '}' . $end . '|' . $start . '(.*?)' . $end . '/s';
-        
+
         $parts = preg_split($pattern, $template, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE);
 
-        // parts structure:
-        // [0] => Text
-        // [1] => Group 1 (Raw content)
-        // [2] => Group 2 (Normal content)
-        // [3] => Text
+        // Iterate through parts
+        // preg_split with DELIM_CAPTURE returns:
+        // [Text, Offset]
+        // [Capture1, Offset] (if matched)
+        // [Capture2, Offset] (if matched)
+        // [Text, Offset]
         // ...
-        
-        // However, if a group is not matched, is it returned as empty string or null?
-        // preg_split returns empty string for unmatched groups if they are part of the match?
-        // Actually, let's be careful.
-        // If I match {{{foo}}}, Group 1 is "foo", Group 2 is unmatched.
-        // If I match {{bar}}, Group 1 is unmatched, Group 2 is "bar".
-        
-        // The array will be flattened.
-        // Text, G1, G2, Text, G1, G2...
-        
-        // Let's iterate carefully.
-        $i = 0;
+
+        // However, if a capture group is not matched, it might not be in the array or be empty string?
+        // With PREG_SPLIT_OFFSET_CAPTURE, every item is [string, offset].
+
+        // Let's use a more robust loop.
         $count = count($parts);
-        while ($i < $count) {
-            // Text
-            $text = $parts[$i][0];
-            if ($text !== '') {
-                $tokens[] = ['type' => 'text', 'value' => $text];
+        for ($i = 0; $i < $count; $i++) {
+            // Even indices are always text (between delimiters)
+            if ($i % 3 === 0) {
+                $text = $parts[$i][0];
+                if ($text !== '') {
+                    $tokens[] = ['type' => 'text', 'value' => $text];
+                }
+
+                continue;
             }
-            $i++;
-            
-            if ($i >= $count) break;
-            
-            // Next are the capture groups.
-            // Since we have 2 groups in regex, we expect 2 elements in parts array representing the captures?
-            // Wait, preg_split returns the captures interleaved.
-            // If regex matches, it returns the captures.
-            // If {{{foo}}} matches:
-            // parts[i] = "foo" (Group 1)
-            // parts[i+1] = "" (Group 2, unmatched? or maybe null?)
-            // Actually, let's check if unmatched groups are returned.
-            // Yes, they are returned as empty strings or skipped depending on engine?
-            // Usually empty strings.
-            
-            // But wait, if I use `|`, only one branch matches.
-            // Does preg_split return captures from the other branch?
-            // Yes, usually.
-            
-            // Let's assume we get 2 captures.
-            $raw = $parts[$i][0] ?? null;
-            $normal = $parts[$i+1][0] ?? null;
-            
-            // Check offsets to see which one matched?
-            // Or just check which one is not empty/null (and valid).
-            // But empty string is valid content `{{}}`.
-            // Offset -1 means not matched.
-            
+
+            // Odd indices are captures.
+            // We have 2 capture groups in regex: {{{...}}} (Group 1) and {{...}} (Group 2)
+            // So the pattern repeats every 3 elements: Text, G1, G2, Text, G1, G2...
+
+            // $parts[$i] is Group 1 (Raw)
+            // $parts[$i+1] is Group 2 (Normal)
+
+            $raw = $parts[$i][0];
             $rawOffset = $parts[$i][1];
-            $normalOffset = $parts[$i+1][1];
-            
-            if ($rawOffset !== -1) {
+
+            $normal = $parts[$i + 1][0] ?? ''; // Handle potential missing index if at end?
+            $normalOffset = $parts[$i + 1][1] ?? -1;
+
+            if ($rawOffset !== -1 && $raw !== '') {
                 // Raw matched
                 $tokens[] = $this->parseTag($raw, true);
-            } elseif ($normalOffset !== -1) {
+            } elseif ($normalOffset !== -1 && $normal !== '') {
                 // Normal matched
                 $tokens[] = $this->parseTag($normal, false);
             }
-            
-            $i += 2; // Skip both capture groups
+
+            $i++; // Skip the next capture group as we processed both
         }
 
         return $tokens;
@@ -152,12 +211,12 @@ class Parser
     private function parseTag(string $content, bool $isRaw = false): array
     {
         $content = trim($content);
-        
+
         $type = 'variable';
         if ($isRaw) {
             $type = 'raw';
         }
-        
+
         if (str_starts_with($content, '#')) {
             $type = 'block_start';
             $content = substr($content, 1);
@@ -172,25 +231,33 @@ class Parser
         // Simple regex for splitting by space ignoring quotes
         preg_match_all('/"[^"]*"|\'[^\']*\'|\S+/', $content, $matches);
         $parts = $matches[0] ?? [];
-        
+
         if (empty($parts)) {
             return ['type' => 'text', 'value' => '']; // Should not happen
         }
 
         $name = array_shift($parts);
-        $args = array_map(function($arg) {
-            // Strip quotes if present
-            if ((str_starts_with($arg, '"') && str_ends_with($arg, '"')) || 
-                (str_starts_with($arg, "'") && str_ends_with($arg, "'"))) {
-                return substr($arg, 1, -1);
+        $args = [];
+        $hash = [];
+
+        foreach ($parts as $part) {
+            if (str_contains($part, '=')) {
+                // Named argument (hash)
+                [$key, $val] = explode('=', $part, 2);
+                // We DO NOT strip quotes here anymore.
+                // We let the helper/resolver decide if it's a literal (quoted) or path (unquoted).
+                $hash[$key] = $val;
+            } else {
+                // Positional argument
+                $args[] = $part;
             }
-            return $arg;
-        }, $parts);
+        }
 
         return [
             'type' => $type,
             'name' => $name,
-            'args' => $args
+            'args' => $args,
+            'hash' => $hash,
         ];
     }
 
@@ -216,11 +283,13 @@ class Parser
                     'type' => 'block',
                     'name' => $token['name'],
                     'args' => $token['args'] ?? [],
-                    'children' => []
+                    'hash' => $token['hash'] ?? [],
+                    'children' => [],
                 ];
                 $current[] = $node;
                 // Push reference to children array of the new node onto stack
-                $stack[] = &$current[count($current) - 1]['children'];
+                $lastIndex = array_key_last($current);
+                $stack[] = &$current[$lastIndex]['children'];
             } elseif ($token['type'] === 'block_end') {
                 array_pop($stack);
             } else {

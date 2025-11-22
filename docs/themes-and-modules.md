@@ -1,86 +1,97 @@
 # Themes & Modules
 
-As your application grows, organizing templates becomes crucial. AzHbx provides first-class support for **Themes** (skinning your app) and **Modules** (component-based architecture).
+AzHbx provides a robust system for organizing your views into Themes and Modules, allowing for easy customization and modularity.
 
 ## Themes
 
-Themes allow you to completely change the look of your application by switching the active template directory. This is perfect for CMSs, multi-tenant apps, or simply supporting Dark/Light modes via different template sets.
+Themes allow you to change the look and feel of your application by switching between different sets of views.
 
 ### Directory Structure
 
-Themes live in the `themes/` directory under your `views_path`.
+Themes are located in the `views/themes/` directory.
 
-```text
+```
 views/
-└── themes/
-    ├── default/      <-- The default theme
-    │   ├── layout.hbx
-    │   └── home.hbx
-    └── dark/         <-- A secondary theme
-        └── layout.hbx
+  themes/
+    default/        <-- Default theme
+      layouts/
+      partials/
+      home.hbx
+    dark/           <-- "Dark" theme
+      home.hbx
 ```
 
-### Switching Themes
+### Configuring the Active Theme
 
-You can set the active theme at runtime using the `setTheme` method.
+You can set the active theme when initializing the Engine or dynamically at runtime.
 
 ```php
+$engine = new Engine([
+    'views_path' => __DIR__ . '/views',
+    'theme' => 'dark' // Set active theme
+]);
+
+// Or change it later
 $engine->setTheme('dark');
 ```
 
-### Fallback Logic
+### Resolution Logic
 
-AzHbx implements a smart fallback system. If you request a template while the `dark` theme is active:
+When you request a template (e.g., `$engine->render('home')`), AzHbx looks for it in the following order:
 
-1.  Check `views/themes/dark/template.hbx`
-2.  If not found, check `views/themes/default/template.hbx`
+1.  **Active Theme**: `views/themes/{active_theme}/home.hbx`
+2.  **Default Theme**: `views/themes/default/home.hbx`
+3.  **Root**: `views/home.hbx` (Fallback)
 
-This allows you to create "child themes" that only override specific templates while inheriting the rest from the default theme.
+This allows you to override specific templates in a custom theme while falling back to the default theme for others.
 
 ## Modules
 
-Modules are designed for package-based or domain-driven architectures. They allow you to namespace your templates.
+Modules allow you to group related views, components, and logic together. This is perfect for large applications (e.g., Blog module, Forum module).
 
 ### Directory Structure
 
-Modules live in the `modules/` directory.
+Modules are located in the `views/modules/` directory (or a custom path if configured).
 
-```text
+```
 views/
-└── modules/
-    ├── blog/         <-- Module name: "blog"
-    │   ├── post.hbx
-    │   └── list.hbx
-    └── auth/         <-- Module name: "auth"
-        └── login.hbx
+  modules/
+    Blog/
+      views/
+        post.hbx
+        archive.hbx
+      components/
+        card.hbx
 ```
 
-### Rendering Module Templates
+### Using Module Views
 
-To render a template from a module, use the double-colon `::` syntax: `moduleName::templateName`.
+To render a view from a module, use the `::` separator.
 
 ```php
-// Render the 'post' template from the 'blog' module
-echo $engine->render('blog::post', ['title' => 'My Post']);
+echo $engine->render('Blog::post', ['title' => 'Hello']);
 ```
 
-### Overriding Module Templates
+This resolves to: `views/modules/Blog/views/post.hbx` (or `views/modules/Blog/post.hbx` depending on structure).
 
-You can override module templates from within your active theme. This is powerful for theming third-party modules.
+_Note: The exact structure is defined by the `ModuleManager`. By default, it looks in `views/modules/{Module}/{View}.hbx`._
 
-**Structure for Override:**
+### Module Components
 
-```text
-views/
-└── themes/
-    └── default/
-        └── modules/
-            └── blog/
-                └── post.hbx  <-- Overrides the original blog::post
+As described in the [Components](?page=components) section, you can use components from modules:
+
+```html
+<az-Blog::Card />
 ```
 
-When you call `$engine->render('blog::post')`, AzHbx looks in this order:
+### Overriding Module Views
 
-1.  `views/themes/{activeTheme}/modules/blog/post.hbx`
-2.  `views/themes/default/modules/blog/post.hbx`
-3.  `views/modules/blog/post.hbx`
+You can override module views from within your theme. This is powerful for theming 3rd-party modules.
+
+**Path:** `views/themes/{theme}/modules/{Module}/{view}.hbx`
+
+**Example:**
+To override `Blog::post` in the `dark` theme, create:
+`views/themes/dark/modules/Blog/post.hbx`
+
+AzHbx will prefer this file over the original module file.

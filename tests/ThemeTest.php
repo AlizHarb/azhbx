@@ -34,6 +34,16 @@ test('it renders with themes', function () {
     unlink(__DIR__ . '/../examples/views/themes/default/theme_test.hbx');
     unlink(__DIR__ . '/../examples/views/themes/dark/theme_test.hbx');
     unlink(__DIR__ . '/../examples/views/themes/default/fallback.hbx');
+    // Recursive cleanup for dark theme directory
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(__DIR__ . '/../examples/views/themes/dark', RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($files as $fileinfo) {
+        $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+        $todo($fileinfo->getRealPath());
+    }
     rmdir(__DIR__ . '/../examples/views/themes/dark');
     array_map('unlink', glob(__DIR__ . '/../cache/*.php'));
 });

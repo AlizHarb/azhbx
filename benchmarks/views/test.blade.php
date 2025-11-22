@@ -1,0 +1,1 @@
+<h1>{{$title}}</h1><ul>@foreach($items as $item)<li>{{$item["name"]}}: {{$item["price"]}}</li>@endforeach</ul>

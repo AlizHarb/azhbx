@@ -18,6 +18,11 @@ use Attribute;
  * @link    https://github.com/AlizHarb/azhbx
  */
 #[Attribute(Attribute::TARGET_METHOD)]
+/**
+ * Helper class.
+ *
+ * @package AlizHarb\AzHbx
+ */
 class Helper
 {
     /**

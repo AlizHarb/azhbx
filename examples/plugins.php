@@ -2,9 +2,9 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use AlizHarb\AzHbx\Engine;
-use AlizHarb\AzHbx\Contracts\PluginInterface;
 use AlizHarb\AzHbx\Attributes\Helper;
+use AlizHarb\AzHbx\Contracts\PluginInterface;
+use AlizHarb\AzHbx\Engine;
 
 // 1. Define a Plugin using PHP 8.5 Attributes
 class StringUtilsPlugin implements PluginInterface

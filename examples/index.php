@@ -1,140 +1,233 @@
 <?php
-/**
- * AzHbx Examples Index
- */
+require __DIR__ . '/../src/autoload.php';
+// \AlizHarb\AzHbx\Autoloader::register(); // Not needed, autoload.php registers itself
+
+// Handle Source Code Request
+if (isset($_GET['action']) && $_GET['action'] === 'source' && isset($_GET['file'])) {
+    $file = basename($_GET['file']); // Security: prevent directory traversal
+    $path = __DIR__ . '/' . $file;
+    if (file_exists($path)) {
+        header('Content-Type: text/plain');
+        echo file_get_contents($path);
+    } else {
+        http_response_code(404);
+        echo "File not found.";
+    }
+    exit;
+}
 
 $examples = [
-    'basic.php' => 'Basic Usage',
-    'control_structures.php' => 'Control Structures',
-    'layouts.php' => 'Layouts & Partials',
-    'helpers.php' => 'Custom Helpers',
-    'themes.php' => 'Themes',
-    'modules.php' => 'Modules',
-    'async.php' => 'Async Rendering',
-    'plugins.php' => 'Plugins & Attributes',
-    'no_composer.php' => 'Standalone (No Composer)',
+    'basic.php' => ['title' => 'Basic Rendering', 'icon' => '⚡'],
+    'control_structures.php' => ['title' => 'Control Structures', 'icon' => '🔀'],
+    'components.php' => ['title' => 'Components', 'icon' => '🧩', 'new' => true],
+    'directives.php' => ['title' => 'Directives', 'icon' => '🏷️', 'new' => true],
+    'layouts.php' => ['title' => 'Layouts & Partials', 'icon' => '📐'],
+    'helpers.php' => ['title' => 'Custom Helpers', 'icon' => '🛠️'],
+    'themes.php' => ['title' => 'Themes', 'icon' => '🎨'],
+    'modules.php' => ['title' => 'Modules', 'icon' => '📦'],
+    'plugins.php' => ['title' => 'Plugins', 'icon' => '🔌'],
+    'profiler.php' => ['title' => 'Profiler', 'icon' => '⏱️'],
+    'async.php' => ['title' => 'Async Rendering', 'icon' => '🚀'],
 ];
 
-$currentExample = $_GET['example'] ?? null;
-$output = '';
-$source = '';
-
-if ($currentExample && array_key_exists($currentExample, $examples)) {
-    $file = __DIR__ . '/' . $currentExample;
-    if (file_exists($file)) {
-        $source = file_get_contents($file);
-        
-        ob_start();
-        include $file;
-        $output = ob_get_clean();
-    }
+$currentFile = isset($_GET['file']) ? basename($_GET['file']) : 'basic.php';
+if (!array_key_exists($currentFile, $examples)) {
+    $currentFile = 'basic.php';
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AzHbx - Modern PHP 8.5 Templating</title>
+    <title>AzHbx Examples</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' },
+                        primary: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        pre, code { font-family: 'JetBrains Mono', monospace; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-200 min-h-screen flex flex-col">
-
+<body class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-300 h-screen flex flex-col overflow-hidden transition-colors duration-300">
+    
     <!-- Header -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-white tracking-tight">AzHbx</h1>
-                    <p class="text-xs text-slate-400 font-medium">Modern PHP 8.5 Templating</p>
-                </div>
+    <header class="flex-none h-16 bg-white/80 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/20">
+                <span class="text-white font-bold text-lg">Az</span>
             </div>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">AzHbx <span class="font-normal text-slate-500 dark:text-slate-400">Examples</span></h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <a href="../docs/index.html" class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span class="hidden sm:inline">Docs</span>
+            </a>
+            
+            <!-- Sponsor -->
+            <a href="https://github.com/sponsors/AlizHarb" target="_blank" class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-pink-600 bg-pink-50 hover:bg-pink-100 dark:text-pink-400 dark:bg-pink-900/20 dark:hover:bg-pink-900/30 rounded-full transition-colors border border-pink-200 dark:border-pink-800">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <span>Sponsor</span>
+            </a>
+
+            <!-- Theme Toggle -->
+            <button id="theme-toggle" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
+                <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg id="icon-moon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
+
+            <a href="https://github.com/AlizHarb/azhbx" target="_blank" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
-        
+    <div class="flex flex-1 overflow-hidden">
         <!-- Sidebar -->
-        <aside class="w-full lg:w-1/4 flex-shrink-0">
-            <div class="bg-slate-800 rounded-xl shadow-xl border border-slate-700 overflow-hidden sticky top-24">
-                <div class="p-4 border-b border-slate-700 bg-slate-800/50">
-                    <h2 class="font-semibold text-slate-200">Examples</h2>
-                </div>
-                <nav class="p-2 space-y-1">
-                    <?php foreach ($examples as $file => $title): ?>
-                        <a href="?example=<?= urlencode($file) ?>" 
-                           class="block px-4 py-3 rounded-lg transition-all duration-200 group <?= $currentExample === $file ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700 hover:text-white' ?>">
-                            <div class="flex items-center justify-between">
-                                <span class="font-medium"><?= htmlspecialchars($title) ?></span>
-                                <?php if ($currentExample === $file): ?>
-                                    <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                <?php endif; ?>
-                            </div>
+        <aside class="w-64 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 overflow-y-auto hidden md:block">
+            <div class="p-4">
+                <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 px-2">Examples</h3>
+                <nav class="space-y-1">
+                    <?php foreach ($examples as $file => $info): ?>
+                        <?php $active = $file === $currentFile; ?>
+                        <a href="?file=<?php echo $file; ?>" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors <?php echo $active ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'; ?>">
+                            <span><?php echo $info['icon']; ?></span>
+                            <span class="flex-1"><?php echo $info['title']; ?></span>
+                            <?php if (isset($info['new']) && $info['new']): ?>
+                                <span class="px-1.5 py-0.5 text-[10px] font-bold text-primary-600 bg-primary-100 dark:text-primary-400 dark:bg-primary-900/30 rounded">NEW</span>
+                            <?php endif; ?>
                         </a>
                     <?php endforeach; ?>
                 </nav>
             </div>
         </aside>
 
-        <!-- Content Area -->
-        <section class="w-full lg:w-3/4 space-y-6">
-            <?php if ($currentExample): ?>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-slate-900">
+            <!-- Toolbar -->
+            <div class="flex-none h-12 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-sm font-semibold text-slate-900 dark:text-white"><?php echo $examples[$currentFile]['title']; ?></h2>
+                    
+                    <!-- Tabs -->
+                    <div class="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                        <button onclick="switchTab('preview')" id="tab-preview" class="px-3 py-1 text-xs font-medium rounded-md transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm">Preview</button>
+                        <button onclick="switchTab('code')" id="tab-code" class="px-3 py-1 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">Code</button>
+                    </div>
+                </div>
                 
-                <!-- Output Panel -->
-                <div class="bg-slate-800 rounded-xl shadow-xl border border-slate-700 overflow-hidden">
-                    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                        <h2 class="font-semibold text-emerald-400">Rendered Output</h2>
-                    </div>
-                    <div class="p-6 bg-white text-slate-900 rounded-b-xl overflow-auto">
-                        <?= $output ?: '<span class="text-slate-400 italic">No output returned.</span>' ?>
-                    </div>
+                <a href="?file=<?php echo $currentFile; ?>" target="_blank" class="text-xs text-slate-500 hover:text-primary-600 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    Open in New Tab
+                </a>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 relative overflow-hidden">
+                <!-- Preview View -->
+                <div id="view-preview" class="absolute inset-0 w-full h-full">
+                    <iframe src="<?php echo $currentFile; ?>" class="w-full h-full border-0 bg-white"></iframe>
                 </div>
 
-                <!-- Source Code Panel -->
-                <div class="bg-slate-800 rounded-xl shadow-xl border border-slate-700 overflow-hidden">
-                    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                        <h2 class="font-semibold text-blue-400">Source Code</h2>
-                    </div>
-                    <div class="relative group">
-                        <pre><code class="language-php !bg-slate-900 !p-6 text-sm leading-relaxed"><?= htmlspecialchars($source) ?></code></pre>
-                    </div>
+                <!-- Code View -->
+                <div id="view-code" class="absolute inset-0 w-full h-full hidden bg-[#1a1b26] overflow-auto">
+                    <pre><code class="language-php p-4 text-sm" id="code-content">Loading...</code></pre>
                 </div>
+            </div>
+        </main>
+    </div>
 
-            <?php else: ?>
+    <script>
+        // Theme Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const iconSun = document.getElementById('icon-sun');
+        const iconMoon = document.getElementById('icon-moon');
+        const html = document.documentElement;
+
+        function updateTheme(isDark) {
+            if (isDark) {
+                html.classList.add('dark');
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.classList.remove('dark');
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        updateTheme(savedTheme === 'dark' || (!savedTheme && prefersDark));
+
+        themeToggle.addEventListener('click', () => {
+            updateTheme(!html.classList.contains('dark'));
+        });
+
+        // Tab Logic
+        const viewPreview = document.getElementById('view-preview');
+        const viewCode = document.getElementById('view-code');
+        const tabPreview = document.getElementById('tab-preview');
+        const tabCode = document.getElementById('tab-code');
+        let codeLoaded = false;
+
+        async function switchTab(tab) {
+            if (tab === 'preview') {
+                viewPreview.classList.remove('hidden');
+                viewCode.classList.add('hidden');
                 
-                <!-- Welcome State -->
-                <div class="bg-slate-800 rounded-xl shadow-xl border border-slate-700 p-12 text-center">
-                    <div class="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Select an Example</h2>
-                    <p class="text-slate-400 max-w-md mx-auto">Explore the features of <strong>AzHbx</strong>, the modern PHP 8.5 templating engine.</p>
-                </div>
+                tabPreview.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-sm');
+                tabPreview.classList.remove('text-slate-500', 'dark:text-slate-400');
+                
+                tabCode.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-sm');
+                tabCode.classList.add('text-slate-500', 'dark:text-slate-400');
+            } else {
+                viewPreview.classList.add('hidden');
+                viewCode.classList.remove('hidden');
+                
+                tabCode.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-sm');
+                tabCode.classList.remove('text-slate-500', 'dark:text-slate-400');
+                
+                tabPreview.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-sm');
+                tabPreview.classList.add('text-slate-500', 'dark:text-slate-400');
 
-            <?php endif; ?>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-800 border-t border-slate-700 py-6 mt-auto">
-        <div class="container mx-auto px-6 text-center text-slate-500 text-sm">
-            &copy; <?= date('Y') ?> AzHbx. Built for PHP 8.5+.
-        </div>
-    </footer>
-
+                if (!codeLoaded) {
+                    try {
+                        const response = await fetch('?action=source&file=<?php echo $currentFile; ?>');
+                        const text = await response.text();
+                        const codeBlock = document.getElementById('code-content');
+                        codeBlock.textContent = text;
+                        hljs.highlightElement(codeBlock);
+                        codeLoaded = true;
+                    } catch (e) {
+                        document.getElementById('code-content').textContent = 'Error loading source code.';
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>

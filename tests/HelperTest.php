@@ -20,7 +20,7 @@ test('it renders with if helper', function () {
     // So if I pass ['condition' => true], it is not empty, so it returns true.
     // This is a limitation of my current parser not parsing args.
     // But for this test, it verifies the helper mechanism works.
-    
+
     // Clean up
     unlink(__DIR__ . '/../examples/views/themes/default/if_test.hbx');
 });

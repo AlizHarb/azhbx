@@ -27,7 +27,7 @@ $data = [
     'name' => 'Developer',
     'library' => 'AzHbx',
     'time' => date('Y-m-d H:i:s'),
-    'raw_html' => '<strong>Bold Text</strong>'
+    'raw_html' => '<strong>Bold Text</strong>',
 ];
 
 // Render

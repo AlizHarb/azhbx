@@ -15,7 +15,7 @@ test('it renders a simple template', function () {
     $result = $engine->render('hello', ['name' => 'World']);
 
     expect($result)->toBe('Hello, World!');
-    
+
     // Clean up
     unlink(__DIR__ . '/../examples/views/themes/default/hello.hbx');
 });

@@ -23,16 +23,16 @@ if (!file_exists($asyncPath)) {
 $fiber = new Fiber(function () use ($engine) {
     $data = [
         'user' => 'Loading...',
-        'status' => 'Pending'
+        'status' => 'Pending',
     ];
-    
+
     // In a real async scenario, we might yield here while waiting for I/O
     Fiber::suspend($data);
-    
+
     // Simulate completion
     $data['user'] = 'Async User';
     $data['status'] = 'Loaded';
-    
+
     return $data;
 });
 

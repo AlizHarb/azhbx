@@ -1,0 +1,1 @@
+<h1>{{title}}</h1><ul>{{#each items as |item|}}<li>{{item.name}}: {{item.price}}</li>{{/each}}</ul>

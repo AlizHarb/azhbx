@@ -23,7 +23,7 @@ if (!file_exists($modulePath)) {
 
 $data = [
     'title' => 'Module System',
-    'body' => 'Modules allow you to organize templates into namespaces.'
+    'body' => 'Modules allow you to organize templates into namespaces.',
 ];
 
 // Render using module syntax: module::template

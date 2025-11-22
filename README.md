@@ -6,7 +6,11 @@
 
 [![PHP Version](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=flat-square&logo=php)](https://php.net)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
+[![Tests](https://img.shields.io/github/actions/workflow/status/AlizHarb/azhbx/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/AlizHarb/azhbx/actions)
+[![Static Analysis](https://img.shields.io/github/actions/workflow/status/AlizHarb/azhbx/static-analysis.yml?branch=main&label=static%20analysis&style=flat-square)](https://github.com/AlizHarb/azhbx/actions)
+[![Total Downloads](https://img.shields.io/packagist/dt/alizharb/azhbx.svg?style=flat-square)](https://packagist.org/packages/alizharb/azhbx)
+[![GitHub Stars](https://img.shields.io/github/stars/AlizHarb/azhbx.svg?style=flat-square)](https://github.com/AlizHarb/azhbx/stargazers)
+[![Sponsor](https://img.shields.io/badge/Sponsor-Ali%20Harb-pink?style=flat-square&logo=github-sponsors)](https://github.com/sponsors/AlizHarb)
 
 _Handlebars-inspired • Modern PHP • Production-Ready_
 
@@ -18,7 +22,17 @@ _Handlebars-inspired • Modern PHP • Production-Ready_
 
 ## 🎯 Overview
 
-**AzHbx** (AlizHarb Handlebars Extended) is a powerful, modern PHP templating engine designed for PHP 8.3+. It combines the elegance of Handlebars syntax with cutting-edge PHP features like Property Hooks and Attributes, delivering exceptional performance and developer experience.
+<p align="center">
+  <img src="assets/logo.png" alt="AzHbx Logo" width="200">
+</p>
+
+# AzHbx (AlizHarb Handlebars Extended)
+
+![PHP Version](https://img.shields.io/badge/php-%3E%3D8.3-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-green)
+![License](https://img.shields.io/badge/license-MIT-green)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
+is a powerful, modern PHP templating engine designed for PHP 8.3+. It combines the elegance of Handlebars syntax with cutting-edge PHP features like Property Hooks and Attributes, delivering exceptional performance and developer experience.
 
 ### Why AzHbx?
 
@@ -51,6 +65,11 @@ _Handlebars-inspired • Modern PHP • Production-Ready_
 - **⚡ Async Support**: Compatible with PHP Fibers for non-blocking I/O
 - **🔐 Security First**: XSS prevention with auto-escaping
 - **💾 Smart Caching**: Automatic recompilation on file changes
+- **🚀 Framework Adapters**: Native integration for **Laravel** and **Symfony**
+- **🏎️ High Performance**: Compile-time optimizations make it faster than Twig and Blade
+- **🛠️ Profiler & Debug Toolbar**: Real-time performance stats and hot reload during development.
+- **⚙️ Error Code Catalog**: Standardized error codes for consistent error handling.
+- **🔧 Quality Tools**: Integrated PHPStan and PHP-CS-Fixer for static analysis and code style.
 
 ---
 
@@ -152,20 +171,48 @@ Visit `http://localhost:8001` to see:
 
 ---
 
+## 🧩 Component System
+
+AzHbx supports a powerful component system with Blade-like syntax:
+
+```html
+<!-- Inline Component -->
+<az-Icon name="user" size="lg" />
+
+<!-- Block Component -->
+<az-Alert type="error">
+  <strong>Error!</strong> Something went wrong.
+</az-Alert>
+```
+
+Components are stored in `views/components/` (e.g., `views/components/alert.hbx`).
+
+---
+
+## ⚡ Directives
+
+Directives are special helpers starting with `@` for common tasks:
+
+- `{{ @csrf }}` - CSRF token input
+- `{{ @method "PUT" }}` - HTTP method spoofing
+- `{{# @auth }}...{{/ @auth }}` - Content for authenticated users
+- `{{# @guest }}...{{/ @guest }}` - Content for guests
+- `{{# @env "production" }}...{{/ @env }}` - Environment-specific content
+
+---
+
 ## 🔌 Plugin System
 
-Create powerful extensions using PHP 8.3+ Attributes:
+Create powerful extensions using PHP 8.5+ Attributes:
 
 ```php
 use AlizHarb\AzHbx\Contracts\PluginInterface;
 use AlizHarb\AzHbx\Attributes\Helper;
+use AlizHarb\AzHbx\Attributes\Directive;
 
-class StringUtilsPlugin implements PluginInterface
+class MyPlugin implements PluginInterface
 {
-    public function register(Engine $engine): void
-    {
-        // Optional: manual setup
-    }
+    public function register(Engine $engine): void {}
 
     #[Helper('uppercase')]
     public function uppercase(string $text): string
@@ -173,22 +220,12 @@ class StringUtilsPlugin implements PluginInterface
         return strtoupper($text);
     }
 
-    #[Helper('reverse')]
-    public function reverse(string $text): string
+    #[Directive('myDirective')]
+    public function myDirective(array $context): string
     {
-        return strrev($text);
+        return "Custom Directive";
     }
 }
-
-// Load plugin
-$engine->loadPlugin(new StringUtilsPlugin());
-```
-
-Use in templates:
-
-```html
-<p>{{ uppercase "hello world" }}</p>
-<!-- Output: HELLO WORLD -->
 ```
 
 ---

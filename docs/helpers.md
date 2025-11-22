@@ -1,88 +1,128 @@
 # Helpers
 
-Helpers are the powerhouse of AzHbx. They allow you to execute PHP logic during the rendering process, keeping your templates clean and logic-less.
+Helpers are functions that can be used in your templates to perform logic or data manipulation. AzHbx comes with a set of built-in helpers and allows you to register your own.
 
 ## Built-in Helpers
 
-AzHbx comes with several standard helpers:
+### `if`
 
-- `if`
-- `unless`
-- `each`
-- `with`
-- `partial` (aliased as `>`)
-- `extend`
-- `block`
+Conditionally render a block.
+
+```html
+{{#if isActive}} Active {{/if}}
+```
+
+### `unless`
+
+Conditionally render a block if the value is falsy.
+
+```html
+{{#unless isLoggedIn}} Login {{/unless}}
+```
+
+### `each`
+
+Iterate over an array or object.
+
+```html
+{{#each items}} {{ name }} {{/each}}
+```
+
+### `with`
+
+Change the context to a specific property.
+
+```html
+{{#with user}} {{ name }} ({{ email }}) {{/with}}
+```
+
+### `partial` / `>`
+
+Render a partial view.
+
+```html
+{{> header title="Home" }}
+```
 
 ## Custom Helpers
 
-You can register your own helpers to perform text formatting, data manipulation, or complex logic.
+You can register custom helpers using the `Engine` instance or via Plugins.
 
-### Registering a Helper
-
-Use the `registerHelper` method on the `Engine` instance.
+### Registering via Engine
 
 ```php
-$engine->registerHelper('uppercase', function ($data, $options, $engine) {
-    // $data: The current data context
-    // $options: Contains 'args' (arguments passed in template) and 'fn' (block content)
-    // $engine: The engine instance
-
-    $text = $options['args'][0] ?? '';
-
-    // Resolve variable if it's a key in data
-    if (is_string($text) && isset($data[$text])) {
-        $text = $data[$text];
-    }
-
-    return strtoupper((string)$text);
-});
-```
-
-### Using the Helper
-
-```html
-<p>{{ uppercase "hello world" }}</p>
-<!-- Output: HELLO WORLD -->
-
-<p>{{ uppercase title }}</p>
-<!-- Output: (Value of title in uppercase) -->
-```
-
-## Block Helpers
-
-Block helpers wrap a section of your template. They receive a `fn` callable in `$options` which renders the inner block.
-
-### Example: `bold` Helper
-
-```php
-$engine->registerHelper('bold', function ($data, $options, $engine) {
-    $content = ($options['fn'])($data);
-    return "<strong>{$content}</strong>";
+$engine->registerHelper('uppercase', function ($text) {
+    return strtoupper($text);
 });
 ```
 
 **Usage:**
 
 ```html
-{{#bold}} This text is bold. {{/bold}}
+{{ uppercase "hello" }}
+<!-- HELLO -->
 ```
 
-**Output:**
+### Registering via Plugins (Recommended)
 
-```html
-<strong> This text is bold. </strong>
-```
-
-### Advanced: Conditional Block Helper
-
-You can create custom logic flow.
+Use the `#[Helper]` attribute in a plugin class.
 
 ```php
-$engine->registerHelper('isAdmin', function ($data, $options, $engine) {
-    if (isset($data['user']['role']) && $data['user']['role'] === 'admin') {
-        return ($options['fn'])($data);
+use AlizHarb\AzHbx\Attributes\Helper;
+use AlizHarb\AzHbx\Contracts\PluginInterface;
+
+class StringPlugin implements PluginInterface
+{
+    public function register(Engine $engine): void {}
+
+    #[Helper('reverse')]
+    public function reverse(string $text): string
+    {
+        return strrev($text);
     }
-    return ''; // Or render an {{else}} block if you implement inverse logic
+}
+```
+
+## Helper Arguments
+
+Helpers receive arguments in two ways:
+
+1.  **Positional Arguments**: Passed in order.
+
+    ```html
+    {{ myHelper arg1 arg2 }}
+    ```
+
+    _Access:_ `$options['args'][0]`, `$options['args'][1]`
+
+2.  **Named Arguments (Hash)**: Passed as key-value pairs.
+    ```html
+    {{ myHelper key="value" foo="bar" }}
+    ```
+    _Access:_ `$options['hash']['key']`, `$options['hash']['foo']`
+
+### Helper Signature
+
+```php
+function ($context, $options, $engine) {
+    // $context: Current data context
+    // $options: Array containing 'args', 'hash', and 'fn' (for block helpers)
+    // $engine: The Engine instance
+}
+```
+
+## Block Helpers
+
+Block helpers wrap a section of the template. They receive a `fn` callable in `$options`.
+
+```php
+$engine->registerHelper('bold', function ($context, $options) {
+    return '<b>' . $options['fn']($context) . '</b>';
 });
+```
+
+**Usage:**
+
+```html
+{{#bold}} This is bold {{/bold}}
 ```

@@ -18,7 +18,7 @@ test('it renders layout inheritance', function () {
 
     $result = $engine->render('child', []);
     expect($result)->toBe('Header - Child Content - Footer');
-    
+
     // Clean up
     unlink(__DIR__ . '/../examples/views/themes/default/layout.hbx');
     unlink(__DIR__ . '/../examples/views/themes/default/child.hbx');

@@ -16,6 +16,7 @@ $engine->registerHelper('uppercase', function ($data, $options, $engine) {
     if (is_string($text) && isset($data[$text])) {
         $text = $data[$text];
     }
+
     return strtoupper((string)$text);
 });
 
@@ -25,13 +26,13 @@ $engine->registerHelper('formatDate', function ($data, $options, $engine) {
     if (is_string($date) && isset($data[$date])) {
         $date = $data[$date];
     }
-    
+
     $format = $options['args'][1] ?? 'Y-m-d';
     // Resolve format if needed (though usually string literal)
     if (is_string($format) && isset($data[$format])) {
         $format = $data[$format];
     }
-    
+
     return date($format, strtotime((string)$date));
 });
 
@@ -50,7 +51,7 @@ if (!file_exists($viewPath)) {
 
 $data = [
     'message' => 'hello world',
-    'date' => '2023-10-25'
+    'date' => '2023-10-25',
 ];
 
 echo $engine->render('helpers', $data);

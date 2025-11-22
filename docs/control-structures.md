@@ -1,120 +1,79 @@
 # Control Structures
 
-Control structures allow you to manipulate the flow of your templates. AzHbx provides a set of powerful built-in helpers for conditionals, loops, and context switching.
+AzHbx provides a set of built-in helpers for controlling the flow of your templates.
 
-## Conditionals
+## If / Else
 
-### `if` / `else`
-
-The `if` block renders its content only if the argument evaluates to a truthy value.
+The `{{#if}}` helper renders a block if the argument is truthy (not false, null, empty array, 0, or empty string).
 
 ```html
-{{#if isLoggedIn}}
-<button>Logout</button>
+{{#if isActive}}
+<span class="badge">Active</span>
 {{else}}
-<button>Login</button>
+<span class="badge">Inactive</span>
 {{/if}}
 ```
 
-You can also chain `else if` logic (using nested structures or custom helpers, though standard Handlebars usually relies on nesting):
+### Else If
+
+You can chain conditions using `else if`.
 
 ```html
 {{#if isAdmin}}
-<p>Admin Panel</p>
-{{else}} {{#if isModerator}}
-<p>Mod Panel</p>
+<p>Welcome Admin</p>
+{{else if isModerator}}
+<p>Welcome Moderator</p>
 {{else}}
-<p>User Dashboard</p>
-{{/if}} {{/if}}
+<p>Welcome User</p>
+{{/if}}
 ```
 
-### `unless`
+## Unless
 
-The `unless` helper is the inverse of `if`. It renders the block if the value is **falsy**.
+The `{{#unless}}` helper is the opposite of `if`. It renders the block if the argument is falsy.
 
 ```html
-{{#unless hasLicense}}
-<div class="alert">Please purchase a license.</div>
+{{#unless isLoggedIn}}
+<a href="/login">Login</a>
 {{/unless}}
 ```
 
-## Iteration
+## Loops (Each)
 
-### `each`
-
-The `each` helper iterates over arrays and objects.
-
-#### Iterating Arrays
-
-Inside the block, `{{ this }}` refers to the current element.
-
-```php
-$data = ['items' => ['Apple', 'Banana', 'Cherry']];
-```
+The `{{#each}}` helper iterates over an array or iterable object.
 
 ```html
 <ul>
-  {{#each items}}
-  <li>{{ this }}</li>
+  {{#each users}}
+  <li>{{ name }} ({{ email }})</li>
   {{/each}}
 </ul>
 ```
 
-#### Iterating Objects
+### Accessing the Current Item
 
-When iterating over objects, you can access the key using `{{ @key }}`.
+Inside the loop, the context is set to the current item. You can access properties directly. To access the current item itself (if it's a primitive), use `{{ . }}` or `{{ this }}`.
 
-```php
-$data = ['user' => ['name' => 'John', 'age' => 30]];
-```
+### Loop Variables
 
-```html
-<dl>
-  {{#each user}}
-  <dt>{{ @key }}</dt>
-  <dd>{{ this }}</dd>
-  {{/each}}
-</dl>
-```
+_Note: Support for `@index`, `@key`, `@first`, `@last` is available in standard Handlebars, and AzHbx implements basic iteration._
 
-#### Empty Lists
+### Empty Lists
 
-You can provide an `{{else}}` block which will be rendered if the list is empty.
+You can use `{{else}}` with `each` to display content when the list is empty.
 
 ```html
 {{#each items}}
-<li>{{ this }}</li>
+<li>{{ name }}</li>
 {{else}}
 <li>No items found.</li>
 {{/each}}
 ```
 
-## Context Switching
+### Aliasing
 
-### `with`
-
-The `with` helper shifts the context to a specific property. This is useful for grouping nested data.
-
-```php
-$data = [
-    'author' => [
-        'name' => 'Jane Doe',
-        'bio' => 'Writer'
-    ]
-];
-```
+You can alias the loop variable for clarity, especially in nested loops.
 
 ```html
-{{#with author}}
-<h2>{{ name }}</h2>
-<p>{{ bio }}</p>
-{{/with}}
-```
-
-Inside the `with` block, you can access the parent context using `../`.
-
-```html
-{{#with author}}
-<p>{{ name }} works at {{ ../companyName }}</p>
-{{/with}}
+{{#each users as |user|}} {{ user.name }} {{/each}}
 ```

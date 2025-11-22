@@ -61,7 +61,7 @@ if (!file_exists($childPath)) {
 $data = [
     'title' => 'Layout Example',
     'year' => date('Y'),
-    'pageTitle' => 'Welcome to Layouts'
+    'pageTitle' => 'Welcome to Layouts',
 ];
 
 echo $engine->render('page', $data);

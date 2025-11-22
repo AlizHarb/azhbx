@@ -44,6 +44,7 @@ class Renderer
     public function render(string $compiledPath, array $data): string
     {
         $renderFn = require $compiledPath;
+
         return $renderFn($data, $this->engine);
     }
 }

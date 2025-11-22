@@ -50,7 +50,7 @@ class PartialLoader
         if (file_exists($path)) {
             return $path;
         }
-        
+
         return null;
     }
 }

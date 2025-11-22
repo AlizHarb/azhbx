@@ -46,21 +46,40 @@ class AttributeLoader
         $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method) {
-            $attributes = $method->getAttributes(Helper::class);
-            foreach ($attributes as $attribute) {
-                $helperAttr = $attribute->newInstance();
-                $helperName = $helperAttr->name;
+            // Handle #[Helper]
+            $helperAttributes = $method->getAttributes(Helper::class);
+            foreach ($helperAttributes as $attribute) {
+                $attrInst = $attribute->newInstance();
+                $this->engine->registerHelper($attrInst->name, $this->createCallback($object, $method));
+            }
 
-                $this->engine->registerHelper($helperName, function ($data, $options, $engine) use ($object, $method) {
-                    // Forward call to the object method
-                    // We expect the method to handle arguments directly or via options
-                    // For simplicity in this advanced version, we'll pass raw args
-                    // But to maintain compatibility with our helper signature:
-                    
-                    $args = $options['args'] ?? [];
-                    return $method->invokeArgs($object, $args);
-                });
+            // Handle #[Directive]
+            $directiveAttributes = $method->getAttributes(Attributes\Directive::class);
+            foreach ($directiveAttributes as $attribute) {
+                $attrInst = $attribute->newInstance();
+                $name = $attrInst->name;
+                if (!str_starts_with($name, '@')) {
+                    $name = '@' . $name;
+                }
+                $this->engine->registerHelper($name, $this->createCallback($object, $method));
             }
         }
+    }
+
+    /**
+     * Create a callback for the helper/directive
+     *
+     * @param object $object
+     * @param ReflectionMethod $method
+     * @return \Closure
+     */
+    private function createCallback(object $object, ReflectionMethod $method): \Closure
+    {
+        return function ($data, $options, $engine) use ($object, $method) {
+            // We pass the context ($data) and options to the method if it requests them
+            // Or we can just pass what we have.
+            // Let's pass standard arguments: $context, $options
+            return $method->invoke($object, $data, $options);
+        };
     }
 }

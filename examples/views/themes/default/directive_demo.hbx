@@ -1,0 +1,17 @@
+
+<h1>Directive Demo</h1>
+
+<form method="POST">
+    @csrf
+    @method "PUT"
+    
+    <button type="submit">Submit</button>
+</form>
+
+@env "production"
+    <p>This is production environment.</p>
+@endenv
+
+@env "local"
+    <p>This is local environment.</p>
+@endenv

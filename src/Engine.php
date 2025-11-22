@@ -69,6 +69,20 @@ class Engine
     private ModuleManager $moduleManager;
 
     /**
+     * Component manager
+     *
+     * @var ComponentManager
+     */
+    private ComponentManager $componentManager;
+
+    /**
+     * Directive registry
+     *
+     * @var DirectiveRegistry
+     */
+    private DirectiveRegistry $directiveRegistry;
+
+    /**
      * Template blocks storage for layouts
      *
      * @var array<string, string>
@@ -83,6 +97,13 @@ class Engine
     private bool $capturing = false;
 
     /**
+     * Profiler instance
+     *
+     * @var Profiler|null
+     */
+    private ?Profiler $profiler = null;
+
+    /**
      * Initialize the template engine
      *
      * @param array<string, mixed> $config Configuration options:
@@ -92,6 +113,7 @@ class Engine
      *                                     - delimiters: Opening/closing delimiters (default: ['{{', '}}'])
      *                                     - allow_php: Allow PHP code in templates (default: false)
      *                                     - default_theme: Default theme name (default: 'default')
+     *                                     - debug: Enable debug mode/profiler (default: false)
      */
     public function __construct(array $config = [])
     {
@@ -102,19 +124,52 @@ class Engine
             'delimiters' => ['{{', '}}'],
             'allow_php' => false,
             'default_theme' => 'default',
+            'debug' => false,
         ], $config);
+
+        if ($this->config['debug']) {
+            $this->profiler = new Profiler();
+        }
 
         $this->helperRegistry = new HelperRegistry();
         $this->partialLoader = new PartialLoader($this->config['views_path']);
         $this->themeManager = new ThemeManager($this->config['views_path'], $this->config['default_theme']);
         $this->moduleManager = new ModuleManager($this->config['views_path']);
-        
-        // Compiler and Renderer will be initialized lazily or here if they don't have circular deps
-        // For now, let's assume they need the engine or config
+
+        // Initialize new managers
+        $this->componentManager = new ComponentManager($this->config['views_path'] . '/components');
+        $this->directiveRegistry = new DirectiveRegistry();
+
         $this->compiler = new Compiler($this->config);
         $this->renderer = new Renderer($this);
 
         BuiltInHelpers::register($this);
+
+        // Register defaults
+        $this->componentManager->registerComponents($this->helperRegistry);
+        $this->directiveRegistry->registerDefaults($this->helperRegistry);
+    }
+
+    /**
+     * Render a component file
+     *
+     * @param string $path Full path to component file
+     * @param array $data Data context
+     * @return string
+     */
+    public function renderComponent(string $path, array $data): string
+    {
+        return $this->renderFile($path, $data);
+    }
+
+    /**
+     * Get the profiler instance
+     *
+     * @return Profiler|null
+     */
+    public function getProfiler(): ?Profiler
+    {
+        return $this->profiler;
     }
 
     /**
@@ -128,10 +183,16 @@ class Engine
      */
     public function render(string $template, array $data = []): string
     {
+        $this->profiler?->mark("render_start:{$template}");
+
         // Resolve template path
         $templatePath = $this->resolveTemplatePath($template);
-        
-        return $this->renderFile($templatePath, $data);
+
+        $result = $this->renderFile($templatePath, $data);
+
+        $this->profiler?->mark("render_end:{$template}");
+
+        return $result;
     }
 
     /**
@@ -235,7 +296,7 @@ class Engine
     public function loadPlugin(Contracts\PluginInterface $plugin): void
     {
         $plugin->register($this);
-        
+
         // Auto-register helpers via attributes if the plugin object has them
         $loader = new AttributeLoader($this);
         $loader->loadFromObject($plugin);
@@ -265,7 +326,7 @@ class Engine
     {
         // Logic to resolve template based on theme/module
         // This is a simplified version, real logic will be in ThemeManager/ModuleManager
-        
+
         // Check if it's a module template
         if (str_contains($template, '::')) {
             return $this->moduleManager->resolve($template);
@@ -307,6 +368,7 @@ class Engine
         if ($key) {
             return $this->config[$key] ?? null;
         }
+
         return $this->config;
     }
 }

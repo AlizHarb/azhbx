@@ -1,41 +1,42 @@
 # Layouts & Partials
 
-Building maintainable applications requires reusing code. AzHbx provides two primary mechanisms for this: **Partials** for reusable components, and **Layouts** for page structure inheritance.
+AzHbx provides a powerful layout inheritance system, similar to Blade or Twig, allowing you to build complex page structures with ease.
 
 ## Partials
 
-Partials are smaller templates that can be included in other templates. They are typically stored in `views/partials/`.
+Partials are reusable snippets of code that can be included in other views. They are useful for headers, footers, and shared UI elements.
 
 ### Creating a Partial
 
-Create a file `views/partials/card.hbx`:
+Partials are stored in `views/partials/` (by convention, though they can be anywhere).
+
+**`views/partials/header.hbx`**
 
 ```html
-<div class="card">
-  <h3>{{ title }}</h3>
-  <p>{{ content }}</p>
-</div>
+<header>
+  <h1>{{ title }}</h1>
+</header>
 ```
 
 ### Using a Partial
 
-You can include a partial using the `{{> partialName }}` syntax.
+Use the `{{> name }}` syntax or `{{ partial "name" }}` helper.
 
 ```html
-{{> card }}
+{{> partials/header title="My Page" }}
 ```
 
-By default, the partial inherits the **current context**. If you want to pass specific data to the partial, you can do so as named arguments (if supported by your custom helper implementation) or by setting the context.
+You can pass data to the partial as named arguments. These will be merged into the partial's context.
 
-_Note: In standard AzHbx, partials inherit the current data context._
+## Layouts (Inheritance)
 
-## Layouts (Template Inheritance)
+Layouts define the skeleton of your HTML page. Child views "extend" a layout and inject content into specific "blocks".
 
-Layouts allow you to define a master template (skeleton) and inject content into specific blocks. This is achieved using the `extend` and `block` helpers.
+### Creating a Layout
 
-### 1. Define the Layout
+Layouts are typically stored in `views/layouts/`.
 
-Create a layout file, e.g., `views/themes/default/layouts/app.hbx`. Define placeholders using `{{#block "blockName"}}{{/block}}`.
+**`views/layouts/app.hbx`**
 
 ```html
 <!DOCTYPE html>
@@ -44,34 +45,44 @@ Create a layout file, e.g., `views/themes/default/layouts/app.hbx`. Define place
     <title>{{ title }}</title>
   </head>
   <body>
-    <header>{{> header }}</header>
+    <nav>...</nav>
 
     <main>
       {{#block "content"}}
-      <!-- Default content if nothing is injected -->
+      <!-- Default content if not overridden -->
       <p>Default content</p>
       {{/block}}
     </main>
 
-    <footer>&copy; 2025</footer>
+    <footer>{{#block "footer"}} &copy; 2025 {{/block}}</footer>
   </body>
 </html>
 ```
 
-### 2. Extend the Layout
+### Extending a Layout
 
-In your page template (e.g., `home.hbx`), use `{{#extend "layoutName"}}` to specify which layout to use, and `{{#block "blockName"}}` to define the content for the placeholders.
+In your child view, use the `{{#extend}}` helper to specify the parent layout, and `{{#block}}` to define content for the blocks.
+
+**`views/home.hbx`**
 
 ```html
 {{#extend "layouts/app"}} {{#block "content"}}
-<h1>Welcome Home</h1>
-<p>This content is injected into the 'content' block of the layout.</p>
+<h2>Welcome Home</h2>
+<p>This is the home page content.</p>
+{{/block}} {{#block "footer"}}
+<p>Custom footer for home page</p>
 {{/block}} {{/extend}}
 ```
 
-> [!TIP]
-> Ensure your layout paths are relative to your theme root or properly resolved by the engine.
-
 ### Nested Layouts
 
-You can even nest layouts! A layout can extend another layout, allowing for complex hierarchies like `Base Layout -> Auth Layout -> Login Page`.
+You can chain layouts! A child view extends `layouts/two-column`, which extends `layouts/app`.
+
+**`views/layouts/two-column.hbx`**
+
+```html
+{{#extend "layouts/app"}} {{#block "content"}}
+<div class="sidebar">{{#block "sidebar"}} Sidebar {{/block}}</div>
+<div class="main">{{#block "main"}} Main {{/block}}</div>
+{{/block}} {{/extend}}
+```

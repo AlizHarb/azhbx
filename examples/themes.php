@@ -7,7 +7,7 @@ use AlizHarb\AzHbx\Engine;
 $engine = new Engine([
     'views_path' => __DIR__ . '/views',
     'cache_path' => __DIR__ . '/../cache',
-    'default_theme' => 'default'
+    'default_theme' => 'default',
 ]);
 
 // Create Default Theme Template

@@ -1,0 +1,10 @@
+
+<h1>Component Demo</h1>
+
+<az-Alert type="success" icon="check">
+    <strong>Success!</strong> Operation completed successfully.
+</az-Alert>
+
+<az-Alert type="danger" icon="times">
+    <strong>Error!</strong> Something went wrong.
+</az-Alert>

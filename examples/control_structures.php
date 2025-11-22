@@ -54,12 +54,12 @@ $data = [
     'items' => ['Apple', 'Banana', 'Cherry'],
     'user' => [
         'username' => 'jdoe',
-        'email' => 'jdoe@example.com'
+        'email' => 'jdoe@example.com',
     ],
     'profile' => [
         'bio' => 'Software Engineer',
-        'location' => 'New York'
-    ]
+        'location' => 'New York',
+    ],
 ];
 
 echo $engine->render('control_structures', $data);
